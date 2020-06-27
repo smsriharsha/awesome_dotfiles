@@ -13,7 +13,6 @@ local hotkeys_popup = require("awful.hotkeys_popup").widget
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
-
 -- Load Debian menu entries
 local debian = require("debian.menu")
 local has_fdo, freedesktop = pcall(require, "freedesktop")
@@ -303,7 +302,8 @@ globalkeys = gears.table.join(
               {description = "reload awesome", group = "awesome"}),
     awful.key({ modkey, "Shift"   }, "q", awesome.quit,
               {description = "quit awesome", group = "awesome"}),
-
+    awful.key({ modkey,           }, "b", function () awful.spawn("brave-browser") end,
+              {description = "open a browser", group = "launcher"}),
 
     awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)          end,
               {description = "increase master width factor", group = "layout"}),
@@ -328,7 +328,6 @@ globalkeys = gears.table.join(
       awful.util.spawn_with_shell('rofi -show run')
     end
   ),
-
     awful.key({ modkey, "Control" }, "n",
               function ()
                   local c = awful.client.restore()
@@ -400,8 +399,10 @@ clientkeys = gears.table.join(
             c.maximized_horizontal = not c.maximized_horizontal
             c:raise()
         end ,
-        {description = "(un)maximize horizontally", group = "client"})
-)
+        {description = "(un)maximize horizontally", group = "client"}),
+        awful.key({ modkey, 'Control' }, 't', function (c) awful.titlebar.toggle(c) end,
+        {description = 'toggle title bar', group = 'client'})
+        )
 
 -- Bind all key numbers to tags.
 -- Be careful: we use keycodes to make it work on any keyboard layout.
@@ -483,6 +484,7 @@ awful.rules.rules = {
         instance = {
           "DTA",  -- Firefox addon DownThemAll.
           "copyq",  -- Includes session name in class.
+          "Android Emulator - Pixel_3_API_28:5554",
         },
         class = {
           "Arandr",
@@ -493,22 +495,26 @@ awful.rules.rules = {
           "Wpa_gui",
           "pinentry",
           "veromix",
+          "qemu-system-x86_64",
+          "qemu-system-x86_64 -avd Pixel_3_API_28",
+          "Android Emulator - Pixel_3_API_28:5554",
           "xtightvncviewer"},
 
         name = {
-          "Event Tester",  -- xev.
+          "Event Tester",
+          "Android Emulator - Pixel_3_API_28:5554",
         },
         role = {
           "AlarmWindow",  -- Thunderbird's calendar.
-          "pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
+          "pop-up",
+          "Android Emulator - Pixel_3_API_28:5554",
         }
       }, properties = { floating = true }},
 
     -- Add titlebars to normal clients and dialogs
     { rule_any = {type = { "normal", "dialog" }
-      }, properties = { titlebars_enabled = false }
-    },
-
+      }, properties = { titlebars_enabled = true }
+    }
     -- Set Firefox to always map on the tag named "2" on screen 1.
     -- { rule = { class = "Firefox" },
     --   properties = { screen = 1, tag = "2" } },
@@ -572,7 +578,8 @@ client.connect_signal("request::titlebars", function(c)
     }
 end)
 
--- Enable sloppy focus, so that focus follows mouse.
+
+ -- Enable sloppy focus, so that focus follows mouse.
 client.connect_signal("mouse::enter", function(c)
     if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
         and awful.client.focus.filter(c) then
@@ -583,4 +590,3 @@ end)
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
-
